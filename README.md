@@ -7,7 +7,7 @@ response: Company registered successfully.
 POST /login-user: username, password
 response: id, username, reserved_cars
 
-POST /login-user: username, password
+POST /login-company: username, password
 response: id, name, cars
 
 POST /add-car: company_id, name, price
