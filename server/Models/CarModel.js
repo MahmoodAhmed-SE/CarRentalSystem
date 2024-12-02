@@ -10,7 +10,7 @@ const CarSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    price: {
+    price_per_day: {
         type: Number,
         required: true,
     },

@@ -2,18 +2,18 @@ import mongoose from "mongoose";
 
 
 const ReservationSchema = mongoose.Schema({
-    username: {
+    car_id: {
         type: String,
         required: true,
     },
-    password: {
+    user_id: {
         type: String,
         required: true,
     }, 
-    reserved_cars: {
-        type: Array,
+    checkout_date: {
+        type: Date,
         required: true
-    }
+    },
 });
 
 
