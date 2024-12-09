@@ -77,7 +77,7 @@ const Login = () => {
               if (user) {
                 login("user", user);
 
-                navigate("/dashboard");
+                navigate("/");
               } else {
                 alert("an error occured");
               }
@@ -114,7 +114,7 @@ const Login = () => {
 
               if (company) {
                 login("company", company);
-                navigate("/dashboard");
+                navigate("/");
               } else {
                 alert("An Error Occured.");
               }

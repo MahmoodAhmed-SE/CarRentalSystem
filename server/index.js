@@ -167,9 +167,9 @@ app.get("/list-all-cars", async (req, res) => {
   }
 });
 
-app.get("/list-company-cars", async (req, res) => {
+app.post("/list-company-cars", async (req, res) => {
   const {company_id} = req.body;
-
+  
   try {
     const companyIdCastedToObjectId = new mongoose.Types.ObjectId(company_id);
     
@@ -308,23 +308,6 @@ app.delete("/remove-car", async (req, res) => {
 
 })
 
-// User account related APIs 
-app.put("/update-budget", async (req, res) => {
-  const { user_id, new_budget } = req.body;
-
-  try {
-    const userIdCastedToObjectId = new mongoose.Types.ObjectId(user_id);
-
-    const usr = await UserModel.findOne({_id: userIdCastedToObjectId});
-    usr.budget = new_budget;
-    await usr.save();
-
-    res.status(200).send("Budget updated successfully");
-  } catch(err) {
-    console.log(err);
-    res.status(500).send("Internal Server Error");
-  }
-});
 
 app.listen(3001, () => {
   console.log("Server is up and running!");

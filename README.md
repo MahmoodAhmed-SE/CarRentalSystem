@@ -37,7 +37,7 @@ response: [
     },
 ]
 
-GET /list-company-cars: {
+POST /list-company-cars: {
     axios: company_id
 
     response: [

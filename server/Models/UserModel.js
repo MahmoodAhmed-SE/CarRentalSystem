@@ -9,10 +9,6 @@ const UserSchema = mongoose.Schema({
     password: {
         type: String,
         required: true,
-    }, 
-    budget: {
-        type: Number,
-        required: true,
     },
     reserved_cars: {
         type: Array,
