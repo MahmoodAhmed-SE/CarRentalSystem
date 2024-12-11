@@ -1,6 +1,6 @@
 const Footer = () => {
     return (
-        <div>
+        <div className="text-center">
             All Copyrights are reserved.
         </div>
     )

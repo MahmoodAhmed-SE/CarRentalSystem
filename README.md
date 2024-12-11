@@ -92,7 +92,7 @@ DELETE /remove-car: {
     response: 
 }
 
-PUT /update-budget: {
-    axios: user_id, new_budget
-    response: "Budget updated successfully"
+
+PUT /update-car: {
+    axios: id, car_name, price_per_day
 }

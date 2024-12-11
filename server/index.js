@@ -198,7 +198,7 @@ app.get("/list-user-cars", async (req, res) => {
 });
 
 
-app.get("/car-details", async (req, res) => {
+app.post("/car-details", async (req, res) => {
   const { car_id } = req.body;
 
   try {
@@ -307,6 +307,25 @@ app.delete("/remove-car", async (req, res) => {
   }
 
 })
+
+
+app.put("/update-car", async (req, res) => {
+  const {id, car_name, price_per_day} = req.body;
+
+  try {
+    const car = await CarModel.findOne({_id: id});
+
+    car.name = car_name;
+    car.price_per_day = price_per_day;
+
+    await car.save();
+
+    res.status(200).send("Car has been updated successfully");
+  } catch(err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 
 app.listen(3001, () => {

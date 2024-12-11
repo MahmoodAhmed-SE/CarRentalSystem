@@ -15,7 +15,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div>
+    <div className="container-fluid">
       <div className="row">
         <Header />
       </div>
