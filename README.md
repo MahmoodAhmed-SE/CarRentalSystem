@@ -5,7 +5,7 @@ POST /register-company: name, password
 response: Company registered successfully.
 
 POST /login-user: username, password
-response: id, username, reserved_cars
+response: id, username
 
 POST /login-company: username, password
 response: id, name, cars
@@ -51,20 +51,6 @@ POST /list-company-cars: {
     ]
 }
 
-GET /list-user-cars: {
-    axios: user_id
-
-    response: [
-        {
-            "_id": "-",
-            "company_id": "--",
-            "name": "-",
-            "price": 0, 
-            "rental_status": false, // *and true*
-        },
-    ]
-}
-
 
 GET /car-details: {
     axios: car_id
@@ -79,7 +65,7 @@ GET /car-details: {
 }
 
 POST /reserve-car: {
-    axios: user_id, car_id, days
+    axios: user_id, car_id, cost, days
 
     response: "User or Car not found"
     response: "Car is already reserved."
@@ -95,4 +81,9 @@ DELETE /remove-car: {
 
 PUT /update-car: {
     axios: id, car_name, price_per_day
+}
+
+POST /user-rented-cars: {
+    axios: user_id
+    []
 }

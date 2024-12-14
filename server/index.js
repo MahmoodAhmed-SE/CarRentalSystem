@@ -6,6 +6,7 @@ import UserModel from "./Models/UserModel.js";
 import CarModel from "./Models/CarModel.js";
 import ReservationModel from "./Models/ReservationModel.js";
 import CompanyModel from "./Models/CompanyModel.js";
+import { format } from "date-fns";
 
 const app = express();
 
@@ -32,7 +33,12 @@ app.post("/register-user", async (req, res) => {
   }
 
   try {
-    const user = new UserModel({ username, password, budget, reserved_cars: [] });
+    const user = new UserModel({
+      username,
+      password,
+      budget,
+      reserved_cars: [],
+    });
 
     await user.save();
 
@@ -83,7 +89,6 @@ app.post("/login-user", async (req, res) => {
     res.status(200).send({
       id: dbResponse._id,
       username: dbResponse.username,
-      reserved_cars: dbResponse.reserved_cars,
     });
   } catch (err) {
     console.log(err);
@@ -112,7 +117,6 @@ app.post("/login-company", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
 
 // Car Handling APIs
 app.post("/add-car", async (req, res) => {
@@ -168,12 +172,14 @@ app.get("/list-all-cars", async (req, res) => {
 });
 
 app.post("/list-company-cars", async (req, res) => {
-  const {company_id} = req.body;
-  
+  const { company_id } = req.body;
+
   try {
     const companyIdCastedToObjectId = new mongoose.Types.ObjectId(company_id);
-    
-    const cars = await CarModel.find({ company_id: companyIdCastedToObjectId }).exec();
+
+    const cars = await CarModel.find({
+      company_id: companyIdCastedToObjectId,
+    }).exec();
 
     res.status(200).send(cars);
   } catch (err) {
@@ -181,22 +187,6 @@ app.post("/list-company-cars", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
-
-app.get("/list-user-cars", async (req, res) => {
-  const {user_id} = req.body;
-
-  try {
-    const userIdCastedToObjectId = new mongoose.Types.ObjectId(user_id);
-    
-    const cars = await CarModel.find({ user_id: userIdCastedToObjectId }).exec();
-
-    res.status(200).send(cars);
-  } catch (err) {
-    console.log(err);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
 
 app.post("/car-details", async (req, res) => {
   const { car_id } = req.body;
@@ -223,43 +213,42 @@ app.post("/reserve-car", async (req, res) => {
   try {
     const userIdCastedToObjectId = new mongoose.Types.ObjectId(user_id);
     const carIdCastedToObjectId = new mongoose.Types.ObjectId(car_id);
-    
-    const usr = await UserModel.findOne({_id: userIdCastedToObjectId});
+
+    const usr = await UserModel.findOne({ _id: userIdCastedToObjectId });
     const car = await CarModel.findOne({ _id: carIdCastedToObjectId });
 
     if (!usr || !car) {
       res.status(404).send("User or Car not found");
     }
 
-    const reservationExists = await ReservationModel.findOne({user_id: userIdCastedToObjectId, car_id: carIdCastedToObjectId});
-    
+    const reservationExists = await ReservationModel.findOne({
+      user_id: userIdCastedToObjectId,
+      car_id: carIdCastedToObjectId,
+    });
+
     if (reservationExists) {
       res.status(409).send("Car is already reserved.");
       return;
     }
 
     const cost = car.price_per_day * days;
-    
-    if (usr.budget < cost) {
-      res.status(400).send("Insufficient budget to complete the transaction.");
-      return;
-    }
-
-    usr.budget = usr.budget - cost;
 
     const currentDate = new Date();
-    const checkoutDate = new Date(currentDate.getTime() + days * 24 * 60 * 60 * 1000);
-
+    const checkoutDate = new Date(
+      currentDate.getTime() + days * 24 * 60 * 60 * 1000
+    );
 
     const reservation = new ReservationModel({
       user_id: userIdCastedToObjectId,
       car_id: carIdCastedToObjectId,
+      car_name: car.name,
+      cost,
       checkout_date: checkoutDate,
     });
 
     usr.reserved_cars.push(carIdCastedToObjectId);
     car.rental_status = true;
-    
+
     await usr.save();
     await car.save();
     await reservation.save();
@@ -271,49 +260,50 @@ app.post("/reserve-car", async (req, res) => {
   }
 });
 
-
 app.delete("/remove-car", async (req, res) => {
   const { car_id } = req.body;
 
   try {
     const carIdCastedToObjectId = new mongoose.Types.ObjectId(car_id);
 
-    const car = await CarModel.findOne({_id: carIdCastedToObjectId});
+    const car = await CarModel.findOne({ _id: carIdCastedToObjectId });
     const company_id = car.company_id;
 
     await car.deleteOne();
 
-    const company = await CompanyModel.findOne({_id: company_id});
-    company.cars = company.cars.filter(car => car !== carIdCastedToObjectId);
+    const company = await CompanyModel.findOne({ _id: company_id });
+    company.cars = company.cars.filter((car) => car !== carIdCastedToObjectId);
     await company.save();
 
-    const reservation = await ReservationModel.findOne({car_id: carIdCastedToObjectId});
+    const reservation = await ReservationModel.findOne({
+      car_id: carIdCastedToObjectId,
+    });
 
     if (reservation) {
       const userId = reservation.user_id;
       await reservation.deleteOne();
 
-      const user = await UserModel.findOne({_id: userId});
+      const user = await UserModel.findOne({ _id: userId });
       if (user) {
-        user.reserved_cars = user.reserved_cars.filter(car => car !== carIdCastedToObjectId);
+        user.reserved_cars = user.reserved_cars.filter(
+          (car) => car !== carIdCastedToObjectId
+        );
         await user.save();
       }
     }
 
     res.status(200).send("Car has been deleted.");
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     res.status(500).send("Internal Server Error");
   }
-
-})
-
+});
 
 app.put("/update-car", async (req, res) => {
-  const {id, car_name, price_per_day} = req.body;
+  const { id, car_name, price_per_day } = req.body;
 
   try {
-    const car = await CarModel.findOne({_id: id});
+    const car = await CarModel.findOne({ _id: id });
 
     car.name = car_name;
     car.price_per_day = price_per_day;
@@ -321,14 +311,36 @@ app.put("/update-car", async (req, res) => {
     await car.save();
 
     res.status(200).send("Car has been updated successfully");
-  } catch(err) {
+  } catch (err) {
     console.log(err);
     res.status(500).send("Internal Server Error");
   }
 });
 
+app.post("/user-rented-cars", async (req, res) => {
+  const { user_id } = req.body;
+  try {
+    const cars = await ReservationModel.find({ user_id });
+    
+    const carsList = cars.map((car) => {
+      return {
+        car_name: car.car_name,
+        cost: car.cost,
+        checkout_date: format(
+          new Date(String(car.checkout_date)),
+          "yyyy/MM/dd"
+        ),
+      };
+    });
+    
+
+    res.send(carsList);
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 app.listen(3001, () => {
   console.log("Server is up and running!");
 });
-

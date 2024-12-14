@@ -10,6 +10,7 @@ import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import AddingCar from "./Components/AddingCar";
 import UpdateCar from "./Components/UpdateCar";
+import UserRentedCars from "./Routes/UserRentedCars";
 
 function App() {
   return (
@@ -42,6 +43,14 @@ function App() {
             element={
               <PrivateRoute>
                 <UpdateCar />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/user-rented-cars"
+            element={
+              <PrivateRoute>
+                <UserRentedCars />
               </PrivateRoute>
             }
           />

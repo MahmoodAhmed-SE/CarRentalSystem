@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useAuth } from "../Providers/AuthProvider";
+import { Link } from "react-router-dom";
 
 const rentCar = async (user_id, car_id, days) => {
   const endpoint = "http://localhost:3001/reserve-car";
@@ -11,8 +12,6 @@ const rentCar = async (user_id, car_id, days) => {
       car_id,
       days,
     });
-
-    alert("Car has been rented successfully!");
   } catch (err) {
     alert(err);
   }
@@ -25,6 +24,8 @@ const UserDashboard = () => {
   const [days, setDays] = useState(1);
 
   const user_id = auth.user.id;
+
+  const [refresher, setRefresher] = useState(false);
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -40,7 +41,7 @@ const UserDashboard = () => {
     };
 
     fetchCars();
-  }, [availableOnly]);
+  }, [refresher, availableOnly]);
 
   return (
     <div className="text-center p-4">
@@ -56,17 +57,20 @@ const UserDashboard = () => {
         ></input>
       </form>
       <div className="mb-2">
+        <Link className="btn btn-primary m-1" to={"/user-rented-cars"}>
+          Show my rented cars
+        </Link>
         <button
           className="btn btn-secondary m-1"
           onClick={() => setAvailableOnly(false)}
         >
-          Show all cars.
+          Show all cars
         </button>
         <button
           className="btn btn-secondary m-1"
           onClick={() => setAvailableOnly(true)}
         >
-          Show only available cars.
+          Show only available cars
         </button>
       </div>
       <h2 className="mb-3">
@@ -75,12 +79,14 @@ const UserDashboard = () => {
       {cars.length > 0 ? (
         <table className="table table-striped">
           <thead>
-            <th>Car name</th>
-            <th>Car availability</th>
-            <th>Car price per day (OMR)</th>
-            <th>Days to be rented</th>
-            <th>Cost (OMR)</th>
-            <th>Action</th>
+            <tr>
+              <th>Car name</th>
+              <th>Car price per day (OMR)</th>
+              <th>Days to be rented</th>
+              <th>Cost (OMR)</th>
+              <th>Car availability</th>
+              <th>Action</th>
+            </tr>
           </thead>
           <tbody>
             {cars.map((car) => {
@@ -89,15 +95,26 @@ const UserDashboard = () => {
               return (
                 <tr key={_id}>
                   <td>{name}</td>
-                  <td>{rental_status ? "Not available" : "Available"}</td>
                   <td>{price_per_day}</td>
                   <td>{days}</td>
                   <td>{price_per_day * days}</td>
                   <td>
+                    {rental_status ? (
+                      <strong style={{ backgroundColor: "red" }}>
+                        Not available
+                      </strong>
+                    ) : (
+                      "Available"
+                    )}
+                  </td>
+                  <td>
                     <button
                       className="btn btn-primary"
                       disabled={rental_status}
-                      onClick={() => rentCar(user_id, _id, days)}
+                      onClick={() => {
+                        rentCar(user_id, _id, days);
+                        setRefresher(!refresher);
+                      }}
                     >
                       Rent
                     </button>

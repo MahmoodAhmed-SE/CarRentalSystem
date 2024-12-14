@@ -41,16 +41,20 @@ const CompanyDashboard = () => {
   }, []);
 
   return (
-    <div className="text-center mt-4">
+    <div className="text-center mt-4" style={{ minHeight: "400px" }}>
       <h1>Company name: {auth.company.name}</h1>
       <div className="mt-5">
-        <h2>Company Cars  |  <Link to={"/add-car"}>Add new car!</Link></h2>
+        <h2 className="m-5">
+          Company Cars | <Link to={"/add-car"}>Add new car!</Link>
+        </h2>
         {cars.length > 0 ? (
           <table className="table table-striped">
             <thead>
-              <th>Car name</th>
-              <th>Car price per day (OMR)</th>
-              <th>Action</th>
+              <tr>
+                <th>Car name</th>
+                <th>Car price per day (OMR)</th>
+                <th>Action</th>
+              </tr>
             </thead>
             <tbody>
               {cars.map((car) => {
@@ -64,7 +68,7 @@ const CompanyDashboard = () => {
                     <td>
                       <Link
                         className="btn btn-secondary"
-                        style={{marginRight: "10px"}}
+                        style={{ marginRight: "10px" }}
                         to={`/update-car/${_id}`}
                       >
                         Update
@@ -74,7 +78,7 @@ const CompanyDashboard = () => {
                         onClick={() => removeCar(_id)}
                       >
                         Remove
-                      </button> 
+                      </button>
                     </td>
                   </tr>
                 );

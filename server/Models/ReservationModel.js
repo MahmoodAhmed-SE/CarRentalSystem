@@ -9,7 +9,15 @@ const ReservationSchema = mongoose.Schema({
     user_id: {
         type: String,
         required: true,
-    }, 
+    },
+    car_name: {
+        type: String,
+        required: true
+    },
+    cost: {
+        type: Number,
+        required: true
+    },
     checkout_date: {
         type: Date,
         required: true
