@@ -5,6 +5,10 @@ import axios from "axios";
 import { useAuth } from "../Providers/AuthProvider";
 import { Link } from "react-router-dom";
 
+function normalizeToMidnight(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
 const UserRentedCars = () => {
   const { auth } = useAuth();
   const [rentedCars, setRentedCars] = useState([]);
@@ -22,14 +26,14 @@ const UserRentedCars = () => {
       }
     };
     fetchRentedCars();
-  }, []);
+  }, [auth.user.id]);
 
   return (
     <div className="container-fluid">
       <div className="row">
         <Header />
       </div>
-      <div className="row mt-5 text-center" style={{ minHeight: "400px" }}>
+      <div className="row mt-5 text-center" style={{ minHeight: "500px" }}>
         <h2>{auth.user.username} rented cars</h2>
 
         {rentedCars.length > 0 ? (
@@ -43,11 +47,26 @@ const UserRentedCars = () => {
             </thead>
             <tbody>
               {rentedCars.map((car) => {
+                const checkoutDate = new Date(car.checkout_date);
+                const currentDate = new Date();
+
+                const normalizedCheckoutDate =
+                  normalizeToMidnight(checkoutDate);
+                const normalizedCurrentDate = normalizeToMidnight(currentDate);
+
+                const checkoutDatePassed =
+                  normalizedCheckoutDate <= normalizedCurrentDate;
                 return (
                   <tr>
                     <td>{car.car_name}</td>
                     <td>{car.cost}</td>
-                    <td>{car.checkout_date}</td>
+                    <td
+                      style={{
+                        backgroundColor: `${checkoutDatePassed ? "red" : ""}`,
+                      }}
+                    >
+                      {car.checkout_date}
+                    </td>
                   </tr>
                 );
               })}

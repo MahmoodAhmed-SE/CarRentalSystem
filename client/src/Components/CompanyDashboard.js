@@ -10,16 +10,20 @@ const removeCar = async (car_id) => {
         car_id: car_id,
       },
     });
-    alert("Car removed");
+
+    return true;
   } catch (err) {
     console.log(err);
   }
+
+  return false;
 };
 
 const CompanyDashboard = () => {
   const [cars, setCars] = useState([]);
-  const { auth } = useAuth();
+  const [refresher, setRefresher] = useState(false);
 
+  const { auth } = useAuth();
   const { id } = auth.company;
 
   useEffect(() => {
@@ -31,51 +35,69 @@ const CompanyDashboard = () => {
             company_id: id,
           }
         );
+        
         setCars(companyCars.data);
       } catch (err) {
-        console.log(err);
+        alert("An error occured", err);
       }
     };
 
     fetchCompanyCars();
-  }, []);
+  }, [refresher]);
 
   return (
-    <div className="text-center mt-4" style={{ minHeight: "400px" }}>
-      <h1>Company name: {auth.company.name}</h1>
-      <div className="mt-5">
-        <h2 className="m-5">
-          Company Cars | <Link to={"/add-car"}>Add new car!</Link>
-        </h2>
+    <div className="mt-4" style={{ minHeight: "400px" }}>
+      <div className="row" style={{fontSize: "20px"}}>
+        <span>Company name: {auth.company.name}</span>
+        <span>Number of cars: {cars.length}</span>
+      </div>
+        
+      <div className="mt-5 text-center ">
+        <h2 className="m-5">Company Cars | <Link className="btn btn-outline-primary" to={"/add-car"}>Add new car!</Link></h2>
         {cars.length > 0 ? (
-          <table className="table table-striped">
+          <table className="table">
             <thead>
-              <tr>
-                <th>Car name</th>
-                <th>Car price per day (OMR)</th>
-                <th>Action</th>
+              <tr className="table-primary">
+                <th className="col">Car status</th>
+                <th className="col">Car name</th>
+                <th className="col">Car price per day (OMR)</th>
+                <th className="col">Action</th>
               </tr>
             </thead>
             <tbody>
               {cars.map((car) => {
-                const { _id, name, rental_status, company_id, price_per_day } =
-                  car;
+                const { _id, name, rental_status, price_per_day } = car;
 
                 return (
-                  <tr key={_id}>
-                    <td>{name}</td>
-                    <td>{price_per_day}</td>
-                    <td>
+                  <tr
+                    key={_id}
+                    className={rental_status ? "table-success" : "table-secondary"}
+                  >
+                    <td className="col">
+                      {rental_status ? "Rented" : "Not rented"}
+                    </td>
+                    <td className="col">{name}</td>
+                    <td className="col">{price_per_day}</td>
+                    <td className="col">
                       <Link
                         className="btn btn-secondary"
+                        disabled={rental_status}
                         style={{ marginRight: "10px" }}
-                        to={`/update-car/${_id}`}
+                        to={rental_status ? "" : `/update-car/${_id}`}
                       >
                         Update
                       </Link>
                       <button
                         className="btn btn-danger"
-                        onClick={() => removeCar(_id)}
+                        disabled={rental_status}
+                        onClick={() => {
+                          const isRemoved = removeCar(_id);
+
+                          if (isRemoved) {
+                            setRefresher(!refresher);
+                            alert("Car has been removed.");
+                          }
+                        }}
                       >
                         Remove
                       </button>

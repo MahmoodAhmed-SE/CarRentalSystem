@@ -1,6 +1,8 @@
 import { useState } from "react";
-import CompanyLogin from "../Components/CompanyLogin";
-import UserLogin from "../Components/UserLogin";
+import CompanyLogin from "./CompanyLogin";
+import UserLogin from "./UserLogin";
+import Header from "../Components/Header";
+import Footer from "../Components/Footer";
 
 const Login = () => {
   const [type, setType] = useState("user");
@@ -8,21 +10,15 @@ const Login = () => {
   return (
     <div className="container-fluid justify-content-center text-center">
       <div className="row">
-        <div>
-          <button onClick={() => setType("user")} className="btn btn-secondary m-3">
-            Login as a user
-          </button>
-          <button
-            onClick={() => setType("company")}
-            className="btn btn-secondary m-3"
-          >
-            Login as a company
-          </button>
+        <Header />
+      </div>
+      <div className="row mt-3 text-center" style={{ minHeight: "500px" }}>
+        <div className="row">
+          {type == "user" ? <UserLogin /> : <CompanyLogin />}
         </div>
       </div>
-
       <div className="row">
-        {type == "user" ? <UserLogin /> : <CompanyLogin />}
+        <Footer />
       </div>
     </div>
   );

@@ -16,7 +16,6 @@ const CarSchema = mongoose.Schema({
     },
     rental_status: {
         type: Boolean,
-        required: true,
         default: false,
     } 
 });

@@ -20,7 +20,7 @@ const Dashboard = () => {
         <Header />
       </div>
 
-      <div className="row">{content}</div>
+      <div className="row" style={{ minHeight: "500px" }}>{content}</div>
 
       <div className="row">
         <Footer />

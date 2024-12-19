@@ -36,8 +36,6 @@ app.post("/register-user", async (req, res) => {
     const user = new UserModel({
       username,
       password,
-      budget,
-      reserved_cars: [],
     });
 
     await user.save();
@@ -63,7 +61,6 @@ app.post("/register-company", async (req, res) => {
     const company = new CompanyModel({
       name,
       password,
-      cars: [],
     });
 
     await company.save();
@@ -136,11 +133,6 @@ app.post("/add-car", async (req, res) => {
   try {
     const car = new CarModel({ company_id, name, price_per_day });
     const savedCar = await car.save();
-
-    const company = await CompanyModel.findOne({ _id: company_id });
-    company.cars.push(savedCar._id);
-
-    await company.save();
 
     res.status(200).send("Car added successfully");
   } catch (err) {
@@ -246,7 +238,6 @@ app.post("/reserve-car", async (req, res) => {
       checkout_date: checkoutDate,
     });
 
-    usr.reserved_cars.push(carIdCastedToObjectId);
     car.rental_status = true;
 
     await usr.save();
@@ -260,38 +251,15 @@ app.post("/reserve-car", async (req, res) => {
   }
 });
 
+// removing using id of car records from both car and reservation table.
 app.delete("/remove-car", async (req, res) => {
   const { car_id } = req.body;
 
   try {
     const carIdCastedToObjectId = new mongoose.Types.ObjectId(car_id);
 
-    const car = await CarModel.findOne({ _id: carIdCastedToObjectId });
-    const company_id = car.company_id;
-
-    await car.deleteOne();
-
-    const company = await CompanyModel.findOne({ _id: company_id });
-    company.cars = company.cars.filter((car) => car !== carIdCastedToObjectId);
-    await company.save();
-
-    const reservation = await ReservationModel.findOne({
-      car_id: carIdCastedToObjectId,
-    });
-
-    if (reservation) {
-      const userId = reservation.user_id;
-      await reservation.deleteOne();
-
-      const user = await UserModel.findOne({ _id: userId });
-      if (user) {
-        user.reserved_cars = user.reserved_cars.filter(
-          (car) => car !== carIdCastedToObjectId
-        );
-        await user.save();
-      }
-    }
-
+    await CarModel.deleteOne({ _id: carIdCastedToObjectId });
+    
     res.status(200).send("Car has been deleted.");
   } catch (err) {
     console.log(err);
@@ -321,7 +289,7 @@ app.post("/user-rented-cars", async (req, res) => {
   const { user_id } = req.body;
   try {
     const cars = await ReservationModel.find({ user_id });
-    
+
     const carsList = cars.map((car) => {
       return {
         car_name: car.car_name,
@@ -332,7 +300,6 @@ app.post("/user-rented-cars", async (req, res) => {
         ),
       };
     });
-    
 
     res.send(carsList);
   } catch (err) {
@@ -341,6 +308,6 @@ app.post("/user-rented-cars", async (req, res) => {
   }
 });
 
-app.listen(3001, () => {
+app.listen(3001, async () => {
   console.log("Server is up and running!");
 });

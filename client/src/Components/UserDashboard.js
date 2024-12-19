@@ -12,9 +12,13 @@ const rentCar = async (user_id, car_id, days) => {
       car_id,
       days,
     });
+
+    return true;
   } catch (err) {
     alert(err);
   }
+
+  return false;
 };
 
 const UserDashboard = () => {
@@ -77,28 +81,41 @@ const UserDashboard = () => {
         {availableOnly ? "Available cars:" : "All cars:"}
       </h2>
       {cars.length > 0 ? (
-        <table className="table table-striped">
+        <table className="table">
           <thead>
-            <tr>
-              <th>Car name</th>
-              <th>Car price per day (OMR)</th>
-              <th>Days to be rented</th>
-              <th>Cost (OMR)</th>
-              <th>Car availability</th>
-              <th>Action</th>
+            <tr className="table-primary">
+              <th className="col">Car name</th>
+              <th className="col">Car price per day (OMR)</th>
+              <th className="col">Cost (OMR)</th>
+              <th className="col">Car availability</th>
+              <th className="col">Action</th>
             </tr>
           </thead>
           <tbody>
             {cars.map((car) => {
               const { _id, name, rental_status, price_per_day } = car;
 
-              return (
+              // if it is rented, user can not rent the car
+              return rental_status ? (
+                <tr key={_id} className="table-warning">
+                  <td className="col">{name}</td>
+                  <td className="col">{price_per_day}</td>
+                  <td className="col">{price_per_day}</td>
+                  <td className="col">
+                    {rental_status ? "Not available" : "Available"}
+                  </td>
+                  <td className="col">
+                    <button className="btn btn-primary" disabled={true}>
+                      Rent
+                    </button>
+                  </td>
+                </tr>
+              ) : (
                 <tr key={_id}>
-                  <td>{name}</td>
-                  <td>{price_per_day}</td>
-                  <td>{days}</td>
-                  <td>{price_per_day * days}</td>
-                  <td>
+                  <td className="col">{name}</td>
+                  <td className="col">{price_per_day}</td>
+                  <td className="col">{price_per_day * days}</td>
+                  <td className="col">
                     {rental_status ? (
                       <strong style={{ backgroundColor: "red" }}>
                         Not available
@@ -107,13 +124,16 @@ const UserDashboard = () => {
                       "Available"
                     )}
                   </td>
-                  <td>
+                  <td className="col">
                     <button
                       className="btn btn-primary"
-                      disabled={rental_status}
                       onClick={() => {
-                        rentCar(user_id, _id, days);
-                        setRefresher(!refresher);
+                        const isRented = rentCar(user_id, _id, days);
+                        if (isRented) {
+                          setRefresher(!refresher);
+
+                          alert("Car has been rented.")
+                        }
                       }}
                     >
                       Rent

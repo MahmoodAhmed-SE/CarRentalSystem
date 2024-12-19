@@ -1,77 +1,96 @@
 import axios from "axios";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../Providers/AuthProvider";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../Components/Header";
 import Footer from "../Components/Footer";
 
-const register = async (username, password) => {
+const userLogin = async (username, password) => {
   try {
-    await axios.post("http://localhost:3001/register-user", {
+    const response = await axios.post("http://localhost:3001/login-user", {
       username,
       password,
     });
-    return true;
+
+    return response.data;
   } catch (err) {
-    alert("An error occured while registing");
+    return err;
   }
-  return false;
 };
 
-const RegisterUser = () => {
+const UserLogin = () => {
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
+  const [userPassword, setUserPassword] = useState("");
+  const { login } = useAuth();
   const navigate = useNavigate();
+
   return (
     <div className="container-fluid justify-content-center text-center">
       <div className="row">
         <Header />
       </div>
-      <div className="row text-center mt-3" style={{ minHeight: "500px" }}>
-        <h1 className="mb-5">Register new user</h1>
+      <div className="row mt-3 text-center" style={{ minHeight: "500px" }}>
+        <h1 className="mb-5">User Login</h1>
+
         <form>
           <input
-            placeholder="Username"
+            key={1}
             type="text"
+            placeholder="Username"
+            onChange={(e) => setUsername(e.target.value)}
             className="form-control mb-2"
             style={{ width: "700px", margin: "auto" }}
-            onChange={(e) => setUsername(e.target.value)}
           ></input>
           <input
-            placeholder="Password"
+            key={2}
             type="password"
+            placeholder="Password"
+            onChange={(e) => setUserPassword(e.target.value)}
             className="form-control"
             style={{ width: "700px", margin: "auto" }}
-            onChange={(e) => setPassword(e.target.value)}
           ></input>
         </form>
+
         <button
           className="btn btn-primary mb-1"
           style={{ width: "150px", margin: "auto" }}
-          onClick={() => {
+          onClick={async () => {
             let isValid = true;
-            
+
             if (username.length < 1) {
               isValid = false;
 
               alert("Username is empty");
-            } else if (password.length < 8) {
+            } else if (userPassword.length < 8) {
               isValid = false;
-              
+
               alert("Password should be equal or more than 8 characters/numbers.");
             }
 
             if (isValid) {
-              const isRegistered = register(username, password);
-  
-              if (isRegistered) {
-                navigate("/user-login");
+              const user = await userLogin(username, userPassword);
+
+              if (user.response) {
+                alert(user.response.data);
+                return;
+              }
+
+              if (user) {
+                login("user", user);
+
+                navigate("/");
+              } else {
+                alert("an error occured");
               }
             }
           }}
         >
-          Register
+          Login
         </button>
+
+        <div>
+          <Link to={"/register-user"}>Register new user</Link>
+        </div>
       </div>
       <div className="row">
         <Footer />
@@ -80,4 +99,4 @@ const RegisterUser = () => {
   );
 };
 
-export default RegisterUser;
+export default UserLogin;

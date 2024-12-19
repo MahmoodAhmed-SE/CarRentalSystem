@@ -56,7 +56,7 @@ const UpdateCar = () => {
       <div>
         <Header />
       </div>
-      <div className="text-center mt-5">
+      <div className="text-center mt-5" style={{minHeight: "500px"}}>
         <form className="mb-5">
           <input
             type="text"

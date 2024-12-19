@@ -9,10 +9,6 @@ const CompanySchema = mongoose.Schema({
     password: {
         type: String,
         required: true,
-    },
-    cars: {
-        type: Array,
-        required: true,
     }
 });
 
